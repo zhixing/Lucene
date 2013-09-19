@@ -13,17 +13,15 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
-import org.tartarus.snowball.ext.PorterStemmer;
 
 public class SearchEngine {
 	public IndexSearcher searcher = null;
@@ -39,13 +37,25 @@ public class SearchEngine {
 	@SuppressWarnings("deprecation")
 	public ScoreDoc[] performSearch(String queryString, int noOfTopDocs)
 			throws Exception {
-
-		Query query = new QueryParser(
-				Version.LUCENE_44,
-				"content",
-				new EnglishAnalyzer(Version.LUCENE_44)).parse(queryString);
 		
-		TopDocs topDocs = searcher.search(query, noOfTopDocs);
+		String[] fields = {"title", "text", "tag"};
+
+	  	MultiFieldQueryParser mfqp = 
+					new MultiFieldQueryParser(
+							Version.LUCENE_44, 
+							fields, 
+							new EnglishAnalyzer(Version.LUCENE_44)
+					);
+			Query mfqpQuery = mfqp.parse(queryString);
+			
+			TopDocs topDocs = searcher.search(mfqpQuery, noOfTopDocs);
+	    
+	    /*
+	    public MultiFieldQueryParser(Version matchVersion,
+	                     String[] fields,
+	                     Analyzer analyzer,
+	                     Map<String,Float> boosts)
+	                     */
 
 		// System.out.println(topDocs);
 		ScoreDoc[] scoreDocs = topDocs.scoreDocs;
