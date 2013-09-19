@@ -3,6 +3,7 @@ package lucene.demo.business;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +18,7 @@ public class RawDocumentDatabase {
 	 */
 	public static List<RawDocument> getRawDocuments() {
 		if (sRawDocuments == null) {
+			sRawDocuments = new ArrayList<RawDocument>();
 			File dir = new File("data_project1");
 			File[] files = dir.listFiles();
 			for (File file : files) {
