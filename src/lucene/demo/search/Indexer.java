@@ -26,6 +26,10 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.IBSimilarity;
+import org.apache.lucene.search.similarities.LMDirichletSimilarity;
 
 public class Indexer {
 	boolean isIndexedAlready;
@@ -55,7 +59,10 @@ public class Indexer {
 			FSDirectory idx = FSDirectory.open(new File(IndexFileDirectoryGenerator.generatePath(analyzer)));
 			IndexWriterConfig indexWriterConfig = new IndexWriterConfig(
 					Version.LUCENE_44, analyzer);
-
+			indexWriterConfig.setSimilarity(new DefaultSimilarity());
+			//indexWriterConfig.setSimilarity(new BM25Similarity());
+			//indexWriterConfig.setSimilarity(new LMDirichletSimilarity());
+			
 			indexWriter = new IndexWriter(idx, indexWriterConfig);
 
 		}
