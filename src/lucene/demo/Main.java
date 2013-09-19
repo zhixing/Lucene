@@ -27,7 +27,7 @@ public class Main {
 	private static void performNewSearch(String query) throws Exception{
 		System.out.println("performSearch");
 		SearchEngine instance = new SearchEngine();
-		ScoreDoc[] hits = instance.performSearch(query, 10);
+		ScoreDoc[] hits = instance.performSearch(query, 1000);
 
 		System.out.println("Results found: " + hits.length);
 		for (int i = 0; i < hits.length; i++) {
@@ -35,8 +35,10 @@ public class Main {
 			Document doc = instance.searcher.doc(hits[i].doc); // This
 																// retrieves
 																// the
-						System.out.println(i + ". ID: " + doc.get("id") + " title:" + doc.get("title") + " author: " + doc.get("author")
-					+ " text: " + doc.get("text") + " others:" + doc.get("others") + " (" + hit.score + ")");
+			//System.out.println(i + ". ID: " + doc.get("id") + " Title: " + doc.get("title") + " Author: " + doc.get("author")
+			//		+ " Text: " + doc.get("text") + " Others: " + doc.get("others") + " Hit_Score: " + hit.score);
+			
+			System.out.println(i + ". ID: " + doc.get("id"));
 		}
 		System.out.println("performSearch done");
 	}
@@ -64,7 +66,7 @@ public class Main {
 			try{
 				performNewSearch(userQuery);
 				
-				System.out.println("Enter indexes of relevent results, seperated by space. Press enter to proceed.");
+				System.out.println("Enter indexes of relevent results, seperated by space. Press enter to exit.");
 				String currentLine = in.readLine();
 				while(!currentLine.equals("")){
 					
