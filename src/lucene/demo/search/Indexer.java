@@ -41,7 +41,7 @@ public class Indexer {
 	public IndexWriter getIndexWriter(boolean create) throws IOException {
 		if (indexWriter == null && create) {
 
-			final File docDir = new File("index-directory." + analyzer.getClass().toString());
+			final File docDir = new File(IndexFileDirectoryGenerator.generatePath(analyzer));
 
 			if (docDir.exists()) {
 				System.out.println("Index at '" + docDir.getAbsolutePath()
@@ -52,7 +52,7 @@ public class Indexer {
 				isIndexedAlready = false;
 			}
 
-			FSDirectory idx = FSDirectory.open(new File("index-directory." + analyzer.getClass().toString()));
+			FSDirectory idx = FSDirectory.open(new File(IndexFileDirectoryGenerator.generatePath(analyzer)));
 			IndexWriterConfig indexWriterConfig = new IndexWriterConfig(
 					Version.LUCENE_44, analyzer);
 
@@ -95,6 +95,10 @@ public class Indexer {
 		doc.add(new Field("author", rawDocument.getAuthor(), ft));
 		doc.add(new Field("tag", rawDocument.getTag(), ft));
 		doc.add(new Field("others", rawDocument.getOthers(), ft));
+		
+		String allContent = rawDocument.getTitle() + " " + rawDocument.getText() + " "
+							+ rawDocument.getAuthor() + " " + rawDocument.getTag();
+		doc.add(new Field("content", allContent, ft));
 
 		indexWriter.addDocument(doc);
 	}

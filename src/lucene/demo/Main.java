@@ -8,10 +8,13 @@
 package lucene.demo;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import lucene.demo.search.IndexFileDirectoryGenerator;
 import lucene.demo.search.Indexer;
 import lucene.demo.search.SearchEngine;
 import lucene.demo.search.queryOptimizer;
@@ -21,7 +24,13 @@ import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.Fields;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
 public class Main {
@@ -30,7 +39,7 @@ public class Main {
 	public Main() {
 	}
 	
-	private static void performNewSearch(String query, Analyzer analyzer) throws Exception{
+	private static ScoreDoc[] performNewSearch(String query, Analyzer analyzer) throws Exception{
 		System.out.println("performSearch");
 		SearchEngine instance = new SearchEngine(analyzer);
 		ScoreDoc[] hits = instance.performSearch(query, 30);
@@ -38,15 +47,13 @@ public class Main {
 		System.out.println("Results found: " + hits.length);
 		for (int i = 0; i < hits.length; i++) {
 			ScoreDoc hit = hits[i];
-			Document doc = instance.searcher.doc(hits[i].doc); // This
-																// retrieves
-																// the
-			//System.out.println(i + ". ID: " + doc.get("id") + " Title: " + doc.get("title") + " Author: " + doc.get("author")
-			//		+ " Text: " + doc.get("text") + " Others: " + doc.get("others") + " Hit_Score: " + hit.score);
-			
-			System.out.println(i + ". ID: " + doc.get("id"));
+			Document doc = instance.searcher.doc(hits[i].doc);
+			int index = i + 1;
+			System.out.println(index + ". ID: " + doc.get("id"));
 		}
 		System.out.println("performSearch done");
+		
+		return hits;
 	}
 
 	/**
@@ -91,8 +98,14 @@ public class Main {
 			
 			// and retrieve the result
 			try{
-				performNewSearch(userQuery, analyzer);
+				ScoreDoc[] hits;
+				hits = performNewSearch(userQuery, analyzer);
 				
+				//========================			
+				// Fields fields = reader.getTermVectors(hits[0].doc);
+				// fields.terms("title");
+				//===============================
+					
 				System.out.println("Enter indexes of relevent results, seperated by space. Press enter to exit.");
 				String currentLine = in.readLine();
 				while(!currentLine.equals("")){
@@ -101,22 +114,44 @@ public class Main {
 					String[] splited = currentLine.split(" ");
 					int[] index = new int[splited.length];
 					for (int i = 0; i < splited.length; i++) {
-					    index[i] = Character.getNumericValue(splited[i].charAt(0));
+					    index[i] = Character.getNumericValue(splited[i].charAt(0)) - 1;
 					}
 					
 					System.out.print("You have chosen indexes: "); 
+					
+					FSDirectory idx = FSDirectory.open(new File(IndexFileDirectoryGenerator.generatePath(analyzer)));
+				  	DirectoryReader reader = DirectoryReader.open(idx);
+					Map<String, Integer> frequencies = new HashMap<String, Integer>();
+
 					for(int i : index){
-						System.out.print(" " + i);
+						int indexForPrint = i+1;
+						System.out.print(" " + indexForPrint);
+						
+						Fields fields = reader.getTermVectors(hits[i].doc);
+						Terms vector = fields.terms("content");
+						//Terms vector = reader.getTermVector(i, "content");
+						TermsEnum termsEnum = null;
+						termsEnum = vector.iterator(termsEnum);
+						BytesRef text = null;
+						while ((text = termsEnum.next()) != null) {
+						    String term = text.utf8ToString();
+						    int freq = (int) termsEnum.totalTermFreq();
+						    int existingFreq;
+						    if (frequencies.get(term) == null){
+						    	existingFreq = 0;
+						    } else{
+						    	existingFreq = frequencies.get(term);
+						    }
+						    frequencies.put(term, freq + existingFreq);
+						}
 					}
 					System.out.println("");
 					
 					// Optimize the query. And search again:
-					ArrayList<String> releventList = null;
-					ArrayList<String> irreleventList = null;
-					userQuery = queryOptimizer.performRelevenceFeedback(userQuery, releventList, irreleventList);
+					userQuery = queryOptimizer.performRelevenceFeedback(userQuery, frequencies);
 					System.out.println("Searching again based on your feedback, and the query is:");
 					System.out.println(userQuery);
-					performNewSearch(userQuery, analyzer);
+					hits = performNewSearch(userQuery, analyzer);
 					
 					System.out.println("Enter indexed of relevent results, seperated by space. Press enter to proceed.");
 					currentLine = in.readLine();				

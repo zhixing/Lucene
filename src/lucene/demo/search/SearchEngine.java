@@ -32,7 +32,7 @@ public class SearchEngine {
 	/** Creates a new instance of SearchEngine */
 
 	public SearchEngine(Analyzer analyzer) throws IOException {
-		FSDirectory idx = FSDirectory.open(new File("index-directory." + analyzer.getClass().toString()));
+		FSDirectory idx = FSDirectory.open(new File(IndexFileDirectoryGenerator.generatePath(analyzer)));
 		searcher = new IndexSearcher(DirectoryReader.open(idx));
 		this.analyzer = analyzer;
 	}
