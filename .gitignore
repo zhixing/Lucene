@@ -11,6 +11,7 @@
 .project
 .metadata
 bin/**
+index-directory/**
 tmp/**
 tmp/**/*
 *.tmp
