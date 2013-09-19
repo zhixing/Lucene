@@ -16,7 +16,7 @@ import java.util.List;
 import lucene.demo.business.RawDocument;
 import lucene.demo.business.RawDocumentDatabase;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -51,7 +51,7 @@ public class Indexer {
 
 			FSDirectory idx = FSDirectory.open(new File("index-directory"));
 			IndexWriterConfig indexWriterConfig = new IndexWriterConfig(
-					Version.LUCENE_44, new StandardAnalyzer(
+					Version.LUCENE_44, new EnglishAnalyzer(
 							Version.LUCENE_44));
 
 			indexWriter = new IndexWriter(idx, indexWriterConfig);

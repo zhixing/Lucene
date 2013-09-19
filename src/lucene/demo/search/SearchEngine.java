@@ -12,16 +12,18 @@ package lucene.demo.search;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.queryparser.classic.*;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class SearchEngine {
 	public IndexSearcher searcher = null;
@@ -34,13 +36,15 @@ public class SearchEngine {
 		searcher = new IndexSearcher(DirectoryReader.open(idx));
 	}
 
+	@SuppressWarnings("deprecation")
 	public ScoreDoc[] performSearch(String queryString, int noOfTopDocs)
 			throws Exception {
 
-		Query query = new QueryParser(Version.LUCENE_44, "content",
-				new StandardAnalyzer(Version.LUCENE_44))
-				.parse(queryString);
-
+		Query query = new QueryParser(
+				Version.LUCENE_44,
+				"content",
+				new EnglishAnalyzer(Version.LUCENE_44)).parse(queryString);
+		
 		TopDocs topDocs = searcher.search(query, noOfTopDocs);
 
 		// System.out.println(topDocs);
