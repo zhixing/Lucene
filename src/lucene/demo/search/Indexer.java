@@ -84,13 +84,18 @@ public class Indexer {
 				Field.Index.ANALYZED));
 		doc.add(new Field("author", rawDocument.getAuthor(), Field.Store.YES,
 				Field.Index.ANALYZED));
+		doc.add(new Field("tag", rawDocument.getTag(), Field.Store.YES,
+				Field.Index.ANALYZED));
 		doc.add(new Field("others", rawDocument.getOthers(), Field.Store.YES,
 				Field.Index.ANALYZED));
 
 		String fullSearchableText = rawDocument.getTitle() + " "
-				+ rawDocument.getText() + " " + rawDocument.getAuthor();
+				+ rawDocument.getText() + " " 
+				+ rawDocument.getAuthor() + " "
+				+ rawDocument.getTag();
 		doc.add(new Field("content", fullSearchableText, Field.Store.NO,
 				Field.Index.ANALYZED));
+		
 		indexWriter.addDocument(doc);
 	}
 
