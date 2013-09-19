@@ -11,13 +11,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import lucene.demo.search.IndexFileDirectoryGenerator;
 import lucene.demo.search.Indexer;
-import lucene.demo.search.SearchEngine;
 import lucene.demo.search.QueryOptimizer;
+import lucene.demo.search.SearchEngine;
+import lucene.demo.test.TestEngine;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
@@ -38,7 +41,7 @@ public class Main {
 	/** Creates a new instance of Main */
 	public Main() {
 	}
-	
+		
 	private static ScoreDoc[] performNewSearch(String query, Analyzer analyzer) throws Exception{
 		System.out.println("performSearch");
 		SearchEngine instance = new SearchEngine(analyzer);
@@ -55,6 +58,16 @@ public class Main {
 		
 		return hits;
 	}
+	
+	private static List<String> getHitsIDs(ScoreDoc[] hits, Analyzer analyzer) throws Exception{
+		SearchEngine instance = new SearchEngine(analyzer);
+		List<String> toReturn = new ArrayList<String>();
+		for(int i = 0; i < hits.length; i++){
+			Document doc = instance.searcher.doc(hits[i].doc);
+			toReturn.add(doc.get("id"));
+		}
+		return toReturn;
+	}
 
 	/**
 	 * @param args
@@ -65,6 +78,8 @@ public class Main {
 		try {
 			InputStreamReader converter = new InputStreamReader(System.in);
 			BufferedReader in = new BufferedReader(converter);
+			TestEngine testEngine = new TestEngine("test/query.xml", "test/assertion.txt");
+			List<String> queries = new ArrayList<String>(testEngine.getTestQueries().values());
 			
 			System.out.println("Building Indexes. Please choose analyzer for indexing and query:");
 			System.out.println("Press 1: WhitespaceAnalyzer");
@@ -92,19 +107,28 @@ public class Main {
 			System.out.println("rebuildIndexes done");
 			
 			// Let user enter query
-			
+			System.out.println(":");
 			System.out.println("Please enter your query:");
-			String userQuery = in.readLine();
+			String originalUserQuery = in.readLine();
+			String userQuery = originalUserQuery;
+			
+			boolean isQueryContainedInTestCase;
+			if (queries.contains(originalUserQuery)){
+				isQueryContainedInTestCase = true;
+			} else{
+				isQueryContainedInTestCase = false;
+			}
 			
 			// and retrieve the result
 			try{
 				ScoreDoc[] hits;
 				hits = performNewSearch(userQuery, analyzer);
 				
-				//========================			
-				// Fields fields = reader.getTermVectors(hits[0].doc);
-				// fields.terms("title");
-				//===============================
+				if (isQueryContainedInTestCase){
+					List<String> hitsIDs = getHitsIDs(hits, analyzer);
+					//List<float> result = testEngine.calculateSingleAccuracy(originalQuery, hitsIDs);
+					//System.out.println("Percision: " + result.get(0) + "Recall: " + result.get(1));
+				}
 					
 				System.out.println("Enter indexes of relevent results, seperated by space. Press enter to exit.");
 				String currentLine = in.readLine();
@@ -129,7 +153,6 @@ public class Main {
 						
 						Fields fields = reader.getTermVectors(hits[i].doc);
 						Terms vector = fields.terms("content");
-						//Terms vector = reader.getTermVector(i, "content");
 						TermsEnum termsEnum = null;
 						termsEnum = vector.iterator(termsEnum);
 						BytesRef text = null;
@@ -152,6 +175,12 @@ public class Main {
 					System.out.println("Searching again based on your feedback, and the query is:");
 					System.out.println(userQuery);
 					hits = performNewSearch(userQuery, analyzer);
+					
+					if (isQueryContainedInTestCase){
+						List<String> hitsIDs = getHitsIDs(hits, analyzer);
+						//List<float> result = testEngine.calculateSingleAccuracy(originalQuery, hitsIDs);
+						//System.out.println("Percision: " + result.get(0) + "Recall: " + result.get(1));
+					}
 					
 					System.out.println("Enter indexed of relevent results, seperated by space. Press enter to proceed.");
 					currentLine = in.readLine();				
