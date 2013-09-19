@@ -35,8 +35,8 @@ public class Main {
 			Document doc = instance.searcher.doc(hits[i].doc); // This
 																// retrieves
 																// the
-						System.out.println(i + ". ID: " + doc.get("id") + " title:" + doc.get("title") + " author: " + doc.get("author")
-					+ " text: " + doc.get("text") + " others:" + doc.get("others") + " (" + hit.score + ")");
+						System.out.println(i + ". ID: " + doc.get("id") + " Title: " + doc.get("title") + " Author: " + doc.get("author")
+					+ " Text: " + doc.get("text") + " Others: " + doc.get("others") + " Hit_Score: " + hit.score);
 		}
 		System.out.println("performSearch done");
 	}
