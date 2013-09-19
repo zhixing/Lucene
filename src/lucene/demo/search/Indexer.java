@@ -23,7 +23,8 @@ import org.apache.lucene.util.Version;
 
 
 public class Indexer {
-    
+    boolean isIndexedAlready;
+	
     /** Creates a new instance of Indexer */
     public Indexer() {
     }
@@ -37,7 +38,11 @@ public class Indexer {
 
             if (docDir.exists()) {
                 System.out.println("Index at '" + docDir.getAbsolutePath() + "' is already built (delete first!)");
-                System.exit(1);
+                isIndexedAlready = true;
+                return null;
+                //System.exit(1);
+            } else {
+            	isIndexedAlready = false;
             }
         	
         	FSDirectory idx = FSDirectory.open(new File("index-directory"));
@@ -58,8 +63,15 @@ public class Indexer {
     
     public void indexHotel(Hotel hotel) throws IOException {
 
-        System.out.println("Indexing hotel: " + hotel);
         indexWriter = getIndexWriter(false);
+        
+        if (isIndexedAlready){
+        	return;
+        } else{
+        }
+        
+        System.out.println("Indexing hotel: " + hotel);
+        
         Document doc = new Document();
         doc.add(new Field("id", hotel.getId(), Field.Store.YES, Field.Index.NO));
         doc.add(new Field("name", hotel.getName(), Field.Store.YES, Field.Index.ANALYZED));
