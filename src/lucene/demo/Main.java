@@ -32,27 +32,33 @@ import org.apache.lucene.index.Fields;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.LMDirichletSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
 public class Main {
+	
+	private static final int NUM_OF_HITS = 5000;
 
 	/** Creates a new instance of Main */
 	public Main() {
 	}
 		
-	private static ScoreDoc[] performNewSearch(String query, Analyzer analyzer) throws Exception{
+	private static ScoreDoc[] performNewSearch(String query, Analyzer analyzer, Similarity sim) throws Exception{
 		System.out.println("performSearch");
-		SearchEngine instance = new SearchEngine(analyzer);
-		ScoreDoc[] hits = instance.performSearch(query, 10);
+		SearchEngine instance = new SearchEngine(analyzer, sim);
+		ScoreDoc[] hits = instance.performSearch(query, NUM_OF_HITS);
 
 		System.out.println("Results found: " + hits.length);
 		for (int i = 0; i < hits.length; i++) {
 			ScoreDoc hit = hits[i];
 			Document doc = instance.searcher.doc(hits[i].doc);
 			int index = i + 1;
-			System.out.println(index + ". ID: " + doc.get("id"));
+			System.out.println(index + ". ID: " + doc.get("id") + " score: " + hit.score);
 		}
 		System.out.println("performSearch done");
 		
@@ -62,11 +68,12 @@ public class Main {
 	private static void calculateSingleAccuracy(
 			ScoreDoc[] hits, 
 			Analyzer analyzer, 
+			Similarity sim,
 			String originalQuery,
 			Map<String, String> queries,
 			TestEngine testEngine
 			) throws Exception{
-		List<String> hitsIDs = getHitsIDs(hits, analyzer);
+		List<String> hitsIDs = getHitsIDs(hits, analyzer, sim);
 		String queryID = getQueryID(originalQuery, queries);
 		List<Float> result = testEngine.calculateSingleAccuracy(queryID, hitsIDs);
 		System.out.println("The original query was in the test case, hence, we compute the following measurements:");
@@ -84,8 +91,8 @@ public class Main {
 		return toReturn;
 	}
 	
-	private static List<String> getHitsIDs(ScoreDoc[] hits, Analyzer analyzer) throws Exception{
-		SearchEngine instance = new SearchEngine(analyzer);
+	private static List<String> getHitsIDs(ScoreDoc[] hits, Analyzer analyzer, Similarity sim) throws Exception{
+		SearchEngine instance = new SearchEngine(analyzer, sim);
 		List<String> toReturn = new ArrayList<String>();
 		for(int i = 0; i < hits.length; i++){
 			Document doc = instance.searcher.doc(hits[i].doc);
@@ -127,7 +134,28 @@ public class Main {
 					break;
 			}
 			
-			Indexer indexer = new Indexer(analyzer);
+			System.out.println("Please choose similarity measurement:");
+			System.out.println("Press 1: DefaultSimilarity");
+			System.out.println("Press 2: LMDirichletSimilarity");
+			System.out.println("Press 3: BM25Similarity");
+			
+			int choiceOfSimilarity = Integer.parseInt(in.readLine());
+			Similarity sim;
+			switch(choiceOfSimilarity){
+				default:
+					System.out.println("Wrong choice of similarity! We'll choose TFIDFSimilarity by default.");
+				case 1:
+					sim = new DefaultSimilarity(); // Based on TFIDF
+					break;
+				case 2:
+					sim = new LMDirichletSimilarity();
+					break;
+				case 3:
+					sim = new BM25Similarity();
+					break;
+			}
+			
+			Indexer indexer = new Indexer(analyzer, sim);
 			indexer.rebuildIndexes();
 			System.out.println("rebuildIndexes done");
 			
@@ -146,10 +174,10 @@ public class Main {
 			// and retrieve the result
 			try{
 				ScoreDoc[] hits;
-				hits = performNewSearch(userQuery, analyzer);
+				hits = performNewSearch(userQuery, analyzer, sim);
 				
 				if (isQueryContainedInTestCase){
-					calculateSingleAccuracy(hits, analyzer, originalUserQuery, queries, testEngine);
+					calculateSingleAccuracy(hits, analyzer, sim, originalUserQuery, queries, testEngine);
 				}
 					
 				System.out.println("Enter indexes of relevent results, seperated by space. Press enter to exit.");
@@ -160,7 +188,7 @@ public class Main {
 					String[] splited = currentLine.split(" ");
 					int[] index = new int[splited.length];
 					for (int i = 0; i < splited.length; i++) {
-					    index[i] = Character.getNumericValue(splited[i].charAt(0)) - 1;
+					    index[i] =  Integer.parseInt(splited[i]) - 1;
 					}
 					
 					System.out.print("You have chosen indexes: "); 
@@ -196,10 +224,10 @@ public class Main {
 					userQuery = QueryOptimizer.performRelevenceFeedback(userQuery, frequencies);
 					System.out.println("Searching again based on your feedback, and the query is:");
 					System.out.println(userQuery);
-					hits = performNewSearch(userQuery, analyzer);
+					hits = performNewSearch(userQuery, analyzer, sim);
 					
 					if (isQueryContainedInTestCase){
-						calculateSingleAccuracy(hits, analyzer, originalUserQuery, queries, testEngine);
+						calculateSingleAccuracy(hits, analyzer, sim, originalUserQuery, queries, testEngine);
 					}
 					
 					System.out.println("Enter indexed of relevent results, seperated by space. Press enter to proceed.");

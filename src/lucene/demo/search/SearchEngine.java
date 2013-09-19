@@ -11,16 +11,17 @@ package lucene.demo.search;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
@@ -28,20 +29,29 @@ public class SearchEngine {
 	public IndexSearcher searcher = null;
 	private boolean VERBOSE = true;
 	private Analyzer analyzer;
+	private Similarity sim;
+	private final int MAX_LENGTH_TITLE = 72;
 
 	/** Creates a new instance of SearchEngine */
 
-	public SearchEngine(Analyzer analyzer) throws IOException {
+	public SearchEngine(Analyzer analyzer, Similarity sim) throws IOException {
 		FSDirectory idx = FSDirectory.open(new File(IndexFileDirectoryGenerator.generatePath(analyzer)));
 		searcher = new IndexSearcher(DirectoryReader.open(idx));
 		this.analyzer = analyzer;
+		this.sim = sim;
 	}
 
 	@SuppressWarnings("deprecation")
 	public ScoreDoc[] performSearch(String queryString, int noOfTopDocs)
 			throws Exception {
 		
-		String[] fields = {"title", "text", "tag"};
+		String[] fields;
+		
+		if (queryString.length() <= MAX_LENGTH_TITLE){
+			fields = new String[] {"title", "text", "tag"};
+		} else{
+			fields = new String[] {"text"};
+		}
 
 	  	MultiFieldQueryParser mfqp = 
 					new MultiFieldQueryParser(
@@ -50,27 +60,24 @@ public class SearchEngine {
 							analyzer
 					);
 			Query mfqpQuery = mfqp.parse(queryString);
+			searcher.setSimilarity(sim);
 			
 			TopDocs topDocs = searcher.search(mfqpQuery, noOfTopDocs);
-	    
-	    /*
-	    public MultiFieldQueryParser(Version matchVersion,
-	                     String[] fields,
-	                     Analyzer analyzer,
-	                     Map<String,Float> boosts)
-	                     */
 
-		// System.out.println(topDocs);
 		ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-		if (VERBOSE)
-			System.out.println("Total hits in topDocs: " + topDocs.totalHits
-					+ "\n");
-
+		
+		List<ScoreDoc> toReturn = new ArrayList<ScoreDoc>();
 		for (int i = 0; i < scoreDocs.length; i++) {
-			Document doc = searcher.doc(scoreDocs[i].doc); // This retrieves the
+			ScoreDoc hit = scoreDocs[i];
+			if (hit.score > 0.6){
+				toReturn.add(hit);
+			}
+		}
+		ScoreDoc[] finalResult = new ScoreDoc[toReturn.size()];
+		for (int i = 0; i < toReturn.size(); i++){
+			finalResult[i] = toReturn.get(i);
 		}
 
-		return scoreDocs;
-	} // end of query(...)
-
+		return finalResult;
+	} 
 }

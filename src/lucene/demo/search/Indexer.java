@@ -17,27 +17,26 @@ import lucene.demo.business.RawDocument;
 import lucene.demo.business.RawDocumentDatabase;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
-import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.DefaultSimilarity;
-import org.apache.lucene.search.similarities.IBSimilarity;
-import org.apache.lucene.search.similarities.LMDirichletSimilarity;
 
 public class Indexer {
 	boolean isIndexedAlready;
 	Analyzer analyzer;
+	Similarity sim;
 
 	/** Creates a new instance of Indexer */
-	public Indexer(Analyzer analyzer) {
+	public Indexer(Analyzer analyzer, Similarity sim) {
 		this.analyzer = analyzer;
+		this.sim = sim;
 	}
 
 	private IndexWriter indexWriter = null;
@@ -59,9 +58,7 @@ public class Indexer {
 			FSDirectory idx = FSDirectory.open(new File(IndexFileDirectoryGenerator.generatePath(analyzer)));
 			IndexWriterConfig indexWriterConfig = new IndexWriterConfig(
 					Version.LUCENE_44, analyzer);
-			indexWriterConfig.setSimilarity(new DefaultSimilarity());
-			//indexWriterConfig.setSimilarity(new BM25Similarity());
-			//indexWriterConfig.setSimilarity(new LMDirichletSimilarity());
+			indexWriterConfig.setSimilarity(sim);
 			
 			indexWriter = new IndexWriter(idx, indexWriterConfig);
 
