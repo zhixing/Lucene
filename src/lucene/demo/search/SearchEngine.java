@@ -13,8 +13,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.*;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
@@ -30,15 +31,14 @@ public class SearchEngine {
 
 	public SearchEngine() throws IOException {
 		FSDirectory idx = FSDirectory.open(new File("index-directory"));
-		searcher = new IndexSearcher(idx);
-
+		searcher = new IndexSearcher(DirectoryReader.open(idx));
 	}
 
 	public ScoreDoc[] performSearch(String queryString, int noOfTopDocs)
 			throws Exception {
 
-		Query query = new QueryParser(Version.LUCENE_CURRENT, "content",
-				new StandardAnalyzer(Version.LUCENE_CURRENT))
+		Query query = new QueryParser(Version.LUCENE_44, "content",
+				new StandardAnalyzer(Version.LUCENE_44))
 				.parse(queryString);
 
 		TopDocs topDocs = searcher.search(query, noOfTopDocs);

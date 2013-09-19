@@ -19,6 +19,8 @@ import lucene.demo.business.RawDocumentDatabase;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
@@ -49,8 +51,8 @@ public class Indexer {
 
 			FSDirectory idx = FSDirectory.open(new File("index-directory"));
 			IndexWriterConfig indexWriterConfig = new IndexWriterConfig(
-					Version.LUCENE_36, new StandardAnalyzer(
-							Version.LUCENE_36));
+					Version.LUCENE_44, new StandardAnalyzer(
+							Version.LUCENE_44));
 
 			indexWriter = new IndexWriter(idx, indexWriterConfig);
 
@@ -76,25 +78,18 @@ public class Indexer {
 		System.out.println("Indexing raw document: " + rawDocument.getId());
 
 		Document doc = new Document();
-		doc.add(new Field("id", rawDocument.getId(), Field.Store.YES,
-				Field.Index.NO));
-		doc.add(new Field("title", rawDocument.getTitle(), Field.Store.YES,
-				Field.Index.ANALYZED));
-		doc.add(new Field("text", rawDocument.getText(), Field.Store.YES,
-				Field.Index.ANALYZED));
-		doc.add(new Field("author", rawDocument.getAuthor(), Field.Store.YES,
-				Field.Index.ANALYZED));
-		doc.add(new Field("tag", rawDocument.getTag(), Field.Store.YES,
-				Field.Index.ANALYZED));
-		doc.add(new Field("others", rawDocument.getOthers(), Field.Store.YES,
-				Field.Index.ANALYZED));
+		doc.add(new StringField("id", rawDocument.getId(), Field.Store.YES));
+		doc.add(new TextField("title", rawDocument.getTitle(), Field.Store.YES));
+		doc.add(new TextField("text", rawDocument.getText(), Field.Store.YES));
+		doc.add(new TextField("author", rawDocument.getAuthor(), Field.Store.YES));
+		doc.add(new TextField("tag", rawDocument.getTag(), Field.Store.YES));
+		doc.add(new StringField("others", rawDocument.getOthers(), Field.Store.YES));
 
 		String fullSearchableText = rawDocument.getTitle() + " "
 				+ rawDocument.getText() + " " 
 				+ rawDocument.getAuthor() + " "
 				+ rawDocument.getTag();
-		doc.add(new Field("content", fullSearchableText, Field.Store.NO,
-				Field.Index.ANALYZED));
+		doc.add(new TextField("content", fullSearchableText, Field.Store.NO));
 		
 		indexWriter.addDocument(doc);
 	}
