@@ -12,6 +12,7 @@ package lucene.demo.search;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -26,12 +27,14 @@ import org.apache.lucene.util.Version;
 public class SearchEngine {
 	public IndexSearcher searcher = null;
 	private boolean VERBOSE = true;
+	private Analyzer analyzer;
 
 	/** Creates a new instance of SearchEngine */
 
-	public SearchEngine() throws IOException {
-		FSDirectory idx = FSDirectory.open(new File("index-directory"));
+	public SearchEngine(Analyzer analyzer) throws IOException {
+		FSDirectory idx = FSDirectory.open(new File("index-directory." + analyzer.getClass().toString()));
 		searcher = new IndexSearcher(DirectoryReader.open(idx));
+		this.analyzer = analyzer;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -44,7 +47,7 @@ public class SearchEngine {
 					new MultiFieldQueryParser(
 							Version.LUCENE_44, 
 							fields, 
-							new EnglishAnalyzer(Version.LUCENE_44)
+							analyzer
 					);
 			Query mfqpQuery = mfqp.parse(queryString);
 			

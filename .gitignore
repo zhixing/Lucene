@@ -12,6 +12,7 @@
 .metadata
 bin/**
 index-directory/**
+index-directory*/**
 tmp/**
 tmp/**/*
 *.tmp

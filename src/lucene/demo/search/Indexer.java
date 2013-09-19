@@ -16,12 +16,12 @@ import java.util.List;
 import lucene.demo.business.RawDocument;
 import lucene.demo.business.RawDocumentDatabase;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
@@ -29,9 +29,11 @@ import org.apache.lucene.util.Version;
 
 public class Indexer {
 	boolean isIndexedAlready;
+	Analyzer analyzer;
 
 	/** Creates a new instance of Indexer */
-	public Indexer() {
+	public Indexer(Analyzer analyzer) {
+		this.analyzer = analyzer;
 	}
 
 	private IndexWriter indexWriter = null;
@@ -39,7 +41,7 @@ public class Indexer {
 	public IndexWriter getIndexWriter(boolean create) throws IOException {
 		if (indexWriter == null && create) {
 
-			final File docDir = new File("index-directory");
+			final File docDir = new File("index-directory." + analyzer.getClass().toString());
 
 			if (docDir.exists()) {
 				System.out.println("Index at '" + docDir.getAbsolutePath()
@@ -50,10 +52,9 @@ public class Indexer {
 				isIndexedAlready = false;
 			}
 
-			FSDirectory idx = FSDirectory.open(new File("index-directory"));
+			FSDirectory idx = FSDirectory.open(new File("index-directory." + analyzer.getClass().toString()));
 			IndexWriterConfig indexWriterConfig = new IndexWriterConfig(
-					Version.LUCENE_44, new EnglishAnalyzer(
-							Version.LUCENE_44));
+					Version.LUCENE_44, analyzer);
 
 			indexWriter = new IndexWriter(idx, indexWriterConfig);
 

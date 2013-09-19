@@ -8,15 +8,21 @@
 package lucene.demo;
 
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Scanner;
 
-import lucene.demo.search.*;
+import lucene.demo.search.Indexer;
+import lucene.demo.search.SearchEngine;
+import lucene.demo.search.queryOptimizer;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.util.Version;
 
 public class Main {
 
@@ -24,10 +30,10 @@ public class Main {
 	public Main() {
 	}
 	
-	private static void performNewSearch(String query) throws Exception{
+	private static void performNewSearch(String query, Analyzer analyzer) throws Exception{
 		System.out.println("performSearch");
-		SearchEngine instance = new SearchEngine();
-		ScoreDoc[] hits = instance.performSearch(query, 1000);
+		SearchEngine instance = new SearchEngine(analyzer);
+		ScoreDoc[] hits = instance.performSearch(query, 30);
 
 		System.out.println("Results found: " + hits.length);
 		for (int i = 0; i < hits.length; i++) {
@@ -50,21 +56,42 @@ public class Main {
 	public static void main(String[] args) {
 
 		try {
-			// build a lucene index
-			System.out.println("rebuildIndexes");
-			Indexer indexer = new Indexer();
+			InputStreamReader converter = new InputStreamReader(System.in);
+			BufferedReader in = new BufferedReader(converter);
+			
+			System.out.println("Building Indexes. Please choose analyzer for indexing and query:");
+			System.out.println("Press 1: WhitespaceAnalyzer");
+			System.out.println("Press 2: StandardAnalyzer");
+			System.out.println("Press 3: EnglishAnalyzer");
+			
+			int choiceOfAnalyzer = Integer.parseInt(in.readLine());
+			Analyzer analyzer;
+			switch(choiceOfAnalyzer){
+				case 1:
+					analyzer = new WhitespaceAnalyzer(Version.LUCENE_44);
+					break;
+				case 2:
+					analyzer = new StandardAnalyzer(Version.LUCENE_44);
+					break;
+				default:
+					System.out.println("Wrong choice of analyzer! We'll choose EnglishAnalyzer by default.");
+				case 3:
+					analyzer = new EnglishAnalyzer(Version.LUCENE_44);
+					break;
+			}
+			
+			Indexer indexer = new Indexer(analyzer);
 			indexer.rebuildIndexes();
 			System.out.println("rebuildIndexes done");
 			
 			// Let user enter query
-			InputStreamReader converter = new InputStreamReader(System.in);
-			BufferedReader in = new BufferedReader(converter);
+			
 			System.out.println("Please enter your query:");
 			String userQuery = in.readLine();
 			
 			// and retrieve the result
 			try{
-				performNewSearch(userQuery);
+				performNewSearch(userQuery, analyzer);
 				
 				System.out.println("Enter indexes of relevent results, seperated by space. Press enter to exit.");
 				String currentLine = in.readLine();
@@ -89,7 +116,7 @@ public class Main {
 					userQuery = queryOptimizer.performRelevenceFeedback(userQuery, releventList, irreleventList);
 					System.out.println("Searching again based on your feedback, and the query is:");
 					System.out.println(userQuery);
-					performNewSearch(userQuery);
+					performNewSearch(userQuery, analyzer);
 					
 					System.out.println("Enter indexed of relevent results, seperated by space. Press enter to proceed.");
 					currentLine = in.readLine();				
