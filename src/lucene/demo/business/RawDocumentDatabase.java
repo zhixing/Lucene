@@ -62,6 +62,13 @@ public class RawDocumentDatabase {
 					doc.setAuthor("");
 				}
 				
+				if (CAIndex - CACMIndex > 2) {
+					// If tag exists
+					doc.setTag(paragraphs[CACMIndex+2]);
+				} else {
+					doc.setTag("");
+				}
+				
 				doc.setOthers(paragraphs[CACMIndex] + " " +
 						paragraphs[CAIndex]);
 				

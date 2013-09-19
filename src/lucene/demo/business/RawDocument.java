@@ -6,6 +6,7 @@ public class RawDocument {
 	private String mTitle;
 	private String mText;
 	private String mAuthor;
+	private String mTag;
 	private String mOthers;
 	
 	public RawDocument() {
@@ -13,6 +14,7 @@ public class RawDocument {
 		mTitle = "";
 		mText = "";
 		mAuthor = "";
+		mTag = "";
 		mOthers = "";
 	}
 	
@@ -20,12 +22,14 @@ public class RawDocument {
 			String title,
 			String text,
 			String author,
+			String tag,
 			String others)
 	{
 		mId = id;
 		mTitle = title;
 		mText = text;
 		mAuthor = author;
+		mTag = tag;
 		mOthers = others;
 	}
 	
@@ -59,6 +63,14 @@ public class RawDocument {
 	
 	public String getAuthor() {
 		return mAuthor;
+	}
+	
+	public void setTag(String tag) {
+		mTag = tag;
+	}
+	
+	public String getTag() {
+		return mTag;
 	}
 	
 	public void setOthers(String others) {
