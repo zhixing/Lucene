@@ -45,7 +45,7 @@ public class Main {
 	private static ScoreDoc[] performNewSearch(String query, Analyzer analyzer) throws Exception{
 		System.out.println("performSearch");
 		SearchEngine instance = new SearchEngine(analyzer);
-		ScoreDoc[] hits = instance.performSearch(query, 30);
+		ScoreDoc[] hits = instance.performSearch(query, 10);
 
 		System.out.println("Results found: " + hits.length);
 		for (int i = 0; i < hits.length; i++) {
@@ -57,6 +57,31 @@ public class Main {
 		System.out.println("performSearch done");
 		
 		return hits;
+	}
+	
+	private static void calculateSingleAccuracy(
+			ScoreDoc[] hits, 
+			Analyzer analyzer, 
+			String originalQuery,
+			Map<String, String> queries,
+			TestEngine testEngine
+			) throws Exception{
+		List<String> hitsIDs = getHitsIDs(hits, analyzer);
+		String queryID = getQueryID(originalQuery, queries);
+		List<Float> result = testEngine.calculateSingleAccuracy(queryID, hitsIDs);
+		System.out.println("The original query was in the test case, hence, we compute the following measurements:");
+		System.out.println("Percision: " + result.get(0) + " Recall: " + result.get(1));
+	}
+	
+	private static String getQueryID(String originalQuery, Map<String, String> queries){
+		String toReturn = "";
+		for (String key : queries.keySet()) {
+		    String value = queries.get(key);
+		    if (value.equals(originalQuery)){
+		    	toReturn = key;
+		    }
+		}
+		return toReturn;
 	}
 	
 	private static List<String> getHitsIDs(ScoreDoc[] hits, Analyzer analyzer) throws Exception{
@@ -79,7 +104,7 @@ public class Main {
 			InputStreamReader converter = new InputStreamReader(System.in);
 			BufferedReader in = new BufferedReader(converter);
 			TestEngine testEngine = new TestEngine("test/query.xml", "test/assertion.txt");
-			List<String> queries = new ArrayList<String>(testEngine.getTestQueries().values());
+			Map<String, String> queries =testEngine.getTestQueries();
 			
 			System.out.println("Building Indexes. Please choose analyzer for indexing and query:");
 			System.out.println("Press 1: WhitespaceAnalyzer");
@@ -107,13 +132,12 @@ public class Main {
 			System.out.println("rebuildIndexes done");
 			
 			// Let user enter query
-			System.out.println(":");
 			System.out.println("Please enter your query:");
 			String originalUserQuery = in.readLine();
 			String userQuery = originalUserQuery;
 			
 			boolean isQueryContainedInTestCase;
-			if (queries.contains(originalUserQuery)){
+			if (queries.values().contains(originalUserQuery)){
 				isQueryContainedInTestCase = true;
 			} else{
 				isQueryContainedInTestCase = false;
@@ -125,9 +149,7 @@ public class Main {
 				hits = performNewSearch(userQuery, analyzer);
 				
 				if (isQueryContainedInTestCase){
-					List<String> hitsIDs = getHitsIDs(hits, analyzer);
-					//List<float> result = testEngine.calculateSingleAccuracy(originalQuery, hitsIDs);
-					//System.out.println("Percision: " + result.get(0) + "Recall: " + result.get(1));
+					calculateSingleAccuracy(hits, analyzer, originalUserQuery, queries, testEngine);
 				}
 					
 				System.out.println("Enter indexes of relevent results, seperated by space. Press enter to exit.");
@@ -177,9 +199,7 @@ public class Main {
 					hits = performNewSearch(userQuery, analyzer);
 					
 					if (isQueryContainedInTestCase){
-						List<String> hitsIDs = getHitsIDs(hits, analyzer);
-						//List<float> result = testEngine.calculateSingleAccuracy(originalQuery, hitsIDs);
-						//System.out.println("Percision: " + result.get(0) + "Recall: " + result.get(1));
+						calculateSingleAccuracy(hits, analyzer, originalUserQuery, queries, testEngine);
 					}
 					
 					System.out.println("Enter indexed of relevent results, seperated by space. Press enter to proceed.");
