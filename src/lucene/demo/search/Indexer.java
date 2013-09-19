@@ -19,6 +19,7 @@ import lucene.demo.business.RawDocumentDatabase;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
@@ -79,18 +80,21 @@ public class Indexer {
 
 		Document doc = new Document();
 		doc.add(new StringField("id", rawDocument.getId(), Field.Store.YES));
-		doc.add(new TextField("title", rawDocument.getTitle(), Field.Store.YES));
-		doc.add(new TextField("text", rawDocument.getText(), Field.Store.YES));
-		doc.add(new TextField("author", rawDocument.getAuthor(), Field.Store.YES));
-		doc.add(new TextField("tag", rawDocument.getTag(), Field.Store.YES));
-		doc.add(new StringField("others", rawDocument.getOthers(), Field.Store.YES));
-
-		String fullSearchableText = rawDocument.getTitle() + " "
-				+ rawDocument.getText() + " " 
-				+ rawDocument.getAuthor() + " "
-				+ rawDocument.getTag();
-		doc.add(new TextField("content", fullSearchableText, Field.Store.NO));
 		
+		FieldType ft = new FieldType();
+		ft.setIndexed(true);
+		ft.setStored(true);
+		ft.setStoreTermVectors(true);
+		ft.setTokenized(true);
+		Field titleField = new Field("title", rawDocument.getTitle(), ft);
+		titleField.setBoost(2.0f);
+		doc.add(titleField);
+		
+		doc.add(new Field("text", rawDocument.getText(), ft));
+		doc.add(new Field("author", rawDocument.getAuthor(), ft));
+		doc.add(new Field("tag", rawDocument.getTag(), ft));
+		doc.add(new Field("others", rawDocument.getOthers(), ft));
+
 		indexWriter.addDocument(doc);
 	}
 
