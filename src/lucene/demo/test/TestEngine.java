@@ -67,17 +67,22 @@ public class TestEngine {
 			
 			for (int i=0; i<docList.getLength(); i++) {
 				Node node = docList.item(i);
-				Node numberNode = node.getChildNodes().item(1);
+				Node identifierNode = node.getChildNodes().item(1);
 				Node queryNode = node.getChildNodes().item(2);
 				
-				String number = numberNode.getTextContent().trim();
+				String identifier = identifierNode.getTextContent().trim();
 				String query = queryNode.getTextContent().trim();
-				mQueries.put(number, query);
+				mQueries.put(identifier, query);
 			}
 		} catch (Exception e) {
 			
 		}
 	}
+	
+	/**
+	 * 
+	 * @return Map<String, String> "q1" => "query string"
+	 */
 	
 	public Map<String, String> getTestQueries(){
 		return mQueries;
@@ -85,7 +90,7 @@ public class TestEngine {
 	
 	/**
 	 * 
-	 * @param result
+	 * @param retrived docs for each query identifier
 	 * @return precision, recall
 	 */
 	public List<Float> calculateAccuracy(Map<String, List<String>> retrieved) {
@@ -94,9 +99,9 @@ public class TestEngine {
 		Float recall = 0f;
 		
 		for (Map.Entry<String, List<String>> entry : retrieved.entrySet()) {
-			String number = entry.getKey();
+			String queryIdentifier = entry.getKey();
 			List<String> retrievedDocs = entry.getValue();
-			List<String> relevantDocs = mAssertion.get(number);
+			List<String> relevantDocs = mAssertion.get(queryIdentifier);
 			
 			List<String> retrievedDocsIntersect = new ArrayList<String>();
 			for (String doc : retrievedDocs) {
@@ -105,12 +110,32 @@ public class TestEngine {
 			// Take the intersection of retrieved docs and relevant docs
 			retrievedDocsIntersect.retainAll(relevantDocs);
 			
-			precision += retrievedDocsIntersect.size() / retrievedDocs.size();
-			recall += retrievedDocsIntersect.size() / relevantDocs.size();
+			precision += retrievedDocsIntersect.size() / new Float(retrievedDocs.size());
+			recall += retrievedDocsIntersect.size() / new Float(relevantDocs.size());
 		}
 		
 		precision /= retrieved.size();
 		recall /= retrieved.size();
+		
+		accuracy.add(precision);
+		accuracy.add(recall);
+		return accuracy;
+	}
+	
+	public List<Float> calculateSingleAccuracy(String queryIdentifier, List<String> retrievedDocs) {
+		List<Float> accuracy = new ArrayList<Float>();
+		Float precision = 0f;
+		Float recall = 0f;
+		
+		List<String> relevantDocs = mAssertion.get(queryIdentifier);
+		List<String> retrievedDocsIntersect = new ArrayList<String>();
+		for (String doc : retrievedDocs) {
+			retrievedDocsIntersect.add(new String(doc));
+		}
+		retrievedDocsIntersect.retainAll(relevantDocs);
+		
+		precision = retrievedDocsIntersect.size() / new Float(retrievedDocs.size());
+		recall = retrievedDocsIntersect.size() / new Float(relevantDocs.size());
 		
 		accuracy.add(precision);
 		accuracy.add(recall);
