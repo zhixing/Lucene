@@ -57,7 +57,7 @@ public class RawDocumentDatabase {
 				
 				if (CAIndex - CACMIndex > 1) {
 					// If author exists
-					doc.setAuthor(paragraphs[CAIndex-1]);
+					doc.setAuthor(paragraphs[CACMIndex+1]);
 				} else {
 					doc.setAuthor("");
 				}
