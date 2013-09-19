@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<DOCS>
+<DOC>
+<DOCNO> q1 </DOCNO>
+
+
+SETL, Very High Level Languages
+
+
+
+</DOC>
+<DOC>
+<DOCNO> q2 </DOCNO>
+
+
+portable operating systems
+
+
+</DOC>
+<DOC>
+<DOCNO> q3 </DOCNO>
+
+
+code optimization for space efficiency
+
+
+</DOC>
+<DOC>
+<DOCNO> q4 </DOCNO>
+
+
+Optimization of intermediate and machine code
+
+
+</DOC>
+<DOC>
+<DOCNO> q5 </DOCNO>
+
+
+Parallel algorithms
+
+
+
+</DOC>
+<DOC>
+<DOCNO> q6 </DOCNO>
+
+
+Graph theoretic algorithms applicable to sparse matrices
+
+
+</DOC>
+<DOC>
+<DOCNO> q7 </DOCNO>
+
+
+Applied stochastic processes
+
+
+</DOC>
+<DOC>
+<DOCNO> q8 </DOCNO>
+
+
+Performance evaluation and modelling of computer systems
+
+
+</DOC>
+<DOC>
+<DOCNO> q9 </DOCNO>
+
+
+Fast algorithm for context-free language recognition or parsing
+
+
+</DOC>
+<DOC>
+<DOCNO> q10 </DOCNO>
+
+
+Texture analysis by computer.	Digitized texture analysis.  Texture
+synthesis. Perception of texture.
+
+
+</DOC>
+<DOC>
+<DOCNO> q11 </DOCNO>
+
+
+The role of information retrieval in knowledge based systems
+(i.e., expert systems).
+
+
+</DOC>
+<DOC>
+<DOCNO> q12 </DOCNO>
+
+
+Dictionary construction and accessing methods for fast retrieval
+of words or lexical items or morphologically related information.
+Hashing or indexing methods are usually applied to English spelling or
+natural language problems.
+
+
+</DOC>
+<DOC>
+<DOCNO> q13 </DOCNO>
+
+
+Information retrieval articles by Gerard Salton or others about clustering,
+bibliographic coupling, use of citations or co-citations, the vector
+space model, Boolean search methods using inverted files, feedback, etc.
+
+Salton, G.
+
+
+</DOC>
+<DOC>
+<DOCNO> q14 </DOCNO>
+
+
+Algorithms for parallel computation, and especially comparisons
+between parallel and sequential algorithms.
+
+
+</DOC>
+</DOCS>
