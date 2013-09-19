@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 
-public class queryOptimizer {
+public class QueryOptimizer {
 	
 	private static <K,V extends Comparable<? super V>> 
     List<Entry<K, V>> entriesSortedByValues(Map<K,V> map) {

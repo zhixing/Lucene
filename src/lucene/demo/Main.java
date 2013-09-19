@@ -17,7 +17,7 @@ import java.util.Map;
 import lucene.demo.search.IndexFileDirectoryGenerator;
 import lucene.demo.search.Indexer;
 import lucene.demo.search.SearchEngine;
-import lucene.demo.search.queryOptimizer;
+import lucene.demo.search.QueryOptimizer;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
@@ -148,7 +148,7 @@ public class Main {
 					System.out.println("");
 					
 					// Optimize the query. And search again:
-					userQuery = queryOptimizer.performRelevenceFeedback(userQuery, frequencies);
+					userQuery = QueryOptimizer.performRelevenceFeedback(userQuery, frequencies);
 					System.out.println("Searching again based on your feedback, and the query is:");
 					System.out.println(userQuery);
 					hits = performNewSearch(userQuery, analyzer);
