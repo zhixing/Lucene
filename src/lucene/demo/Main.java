@@ -8,9 +8,13 @@
 package lucene.demo;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,11 +70,37 @@ public class Main {
 			retrievedDocs.put(queryIdentifier, hitDocs);
 		}
 		
+		writeRetrievedDocsToFile(retrievedDocs);
+		
 		List<Float> accuracy = testEngine.calculateAccuracy(retrievedDocs);
 		
 		return accuracy;
 	}
 		
+	private static void writeRetrievedDocsToFile(
+			Map<String, List<String>> retrievedDocs) {
+		Writer writer = null;
+
+		try {
+		    writer = new BufferedWriter(new OutputStreamWriter(
+		          new FileOutputStream("test/output.txt"), "utf-8"));
+		    
+		    for (Map.Entry<String, List<String>> entry : retrievedDocs.entrySet()){
+		    	String queryIdentifier = entry.getKey();
+		    	List<String> ids = entry.getValue();
+		    	for (String id : ids) {
+		    		writer.write(queryIdentifier + " " + id );
+		    		writer.write("\n");
+		    	}
+		    }
+		} catch (IOException ex){
+			
+		} finally {
+		   try {writer.close();} catch (Exception ex) {}
+		}
+		
+	}
+
 	private static ScoreDoc[] performNewSearch(String query, Analyzer analyzer, Similarity sim) throws Exception{
 		System.out.println("performSearch");
 		SearchEngine instance = new SearchEngine(analyzer, sim);
