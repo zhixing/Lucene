@@ -48,8 +48,27 @@ public class Main {
 	public Main() {
 	}
 	
-	private static void runTestData(){
+	private static List<Float> runTestData(Map<String, String> queries, 
+			Similarity similarity, Analyzer analyzer, TestEngine testEngine) throws Exception{
+		SearchEngine searchEngine = new SearchEngine(analyzer, similarity);
+		Map<String, List<String>> retrievedDocs = new HashMap<String, List<String>>();
 		
+		for (Map.Entry<String, String> entry : queries.entrySet()) {
+			String queryIdentifier = entry.getKey();
+			String queryString = entry.getValue();
+			ScoreDoc[] hits = searchEngine.performSearch(queryString, NUM_OF_HITS);
+			List<String> hitDocs = new ArrayList<String>();
+			for (int i=0; i< hits.length; i++) {
+				ScoreDoc hit = hits[i];
+				Document doc = searchEngine.searcher.doc(hit.doc);
+				hitDocs.add(doc.get("id"));
+			}
+			retrievedDocs.put(queryIdentifier, hitDocs);
+		}
+		
+		List<Float> accuracy = testEngine.calculateAccuracy(retrievedDocs);
+		
+		return accuracy;
 	}
 		
 	private static ScoreDoc[] performNewSearch(String query, Analyzer analyzer, Similarity sim) throws Exception{
@@ -172,7 +191,12 @@ public class Main {
 				default:
 					System.out.println("Wrong choice of Mode! We'll choose test by default.");
 				case 1:
-					// TODO runTestData(query, search);
+					List<Float> accuracy = runTestData(queries, sim, analyzer, testEngine);
+					System.out.println(
+							"Percision: " + accuracy.get(0) + 
+							" Recall: " + accuracy.get(1) + 
+							" F1: " + accuracy.get(2)
+							);
 					return;
 				case 2:
 					

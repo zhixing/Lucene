@@ -31,6 +31,7 @@ public class SearchEngine {
 	private Analyzer analyzer;
 	private Similarity sim;
 	private final int MAX_LENGTH_TITLE = 72;
+	private final float HIT_SCORE_THRESHOLD = 0.5f;
 
 	/** Creates a new instance of SearchEngine */
 
@@ -69,7 +70,7 @@ public class SearchEngine {
 		List<ScoreDoc> toReturn = new ArrayList<ScoreDoc>();
 		for (int i = 0; i < scoreDocs.length; i++) {
 			ScoreDoc hit = scoreDocs[i];
-			if (hit.score > 0.5){
+			if (hit.score > HIT_SCORE_THRESHOLD){
 				toReturn.add(hit);
 			}
 		}
