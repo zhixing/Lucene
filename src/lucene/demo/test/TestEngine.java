@@ -119,6 +119,8 @@ public class TestEngine {
 		
 		accuracy.add(precision);
 		accuracy.add(recall);
+		accuracy.add(2 * precision * recall / (precision + recall));
+
 		return accuracy;
 	}
 	
@@ -139,6 +141,7 @@ public class TestEngine {
 		
 		accuracy.add(precision);
 		accuracy.add(recall);
+		accuracy.add(2 * precision * recall / (precision + recall));
 		return accuracy;
 	}
 }

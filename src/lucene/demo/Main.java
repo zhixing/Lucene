@@ -77,7 +77,7 @@ public class Main {
 		String queryID = getQueryID(originalQuery, queries);
 		List<Float> result = testEngine.calculateSingleAccuracy(queryID, hitsIDs);
 		System.out.println("The original query was in the test case, hence, we compute the following measurements:");
-		System.out.println("Percision: " + result.get(0) + " Recall: " + result.get(1));
+		System.out.println("Percision: " + result.get(0) + " Recall: " + result.get(1) + " F1: " + result.get(2));
 	}
 	
 	private static String getQueryID(String originalQuery, Map<String, String> queries){

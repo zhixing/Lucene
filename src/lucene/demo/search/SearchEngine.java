@@ -69,7 +69,7 @@ public class SearchEngine {
 		List<ScoreDoc> toReturn = new ArrayList<ScoreDoc>();
 		for (int i = 0; i < scoreDocs.length; i++) {
 			ScoreDoc hit = scoreDocs[i];
-			if (hit.score > 0.6){
+			if (hit.score > 0.5){
 				toReturn.add(hit);
 			}
 		}
