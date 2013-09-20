@@ -32,6 +32,8 @@ public class Indexer {
 	boolean isIndexedAlready;
 	Analyzer analyzer;
 	Similarity sim;
+	
+	private final float TITLE_FIELD_BOOST = 2.0f;
 
 	/** Creates a new instance of Indexer */
 	public Indexer(Analyzer analyzer, Similarity sim) {
@@ -92,7 +94,7 @@ public class Indexer {
 		ft.setStoreTermVectors(true);
 		ft.setTokenized(true);
 		Field titleField = new Field("title", rawDocument.getTitle(), ft);
-		titleField.setBoost(2.0f);
+		titleField.setBoost(TITLE_FIELD_BOOST);
 		doc.add(titleField);
 		
 		doc.add(new Field("text", rawDocument.getText(), ft));
