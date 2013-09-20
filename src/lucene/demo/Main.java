@@ -47,6 +47,10 @@ public class Main {
 	/** Creates a new instance of Main */
 	public Main() {
 	}
+	
+	private static void runTestData(){
+		
+	}
 		
 	private static ScoreDoc[] performNewSearch(String query, Analyzer analyzer, Similarity sim) throws Exception{
 		System.out.println("performSearch");
@@ -158,6 +162,22 @@ public class Main {
 			Indexer indexer = new Indexer(analyzer, sim);
 			indexer.rebuildIndexes();
 			System.out.println("rebuildIndexes done");
+			
+			System.out.println("Please choose what you want to run:");
+			System.out.println("Press 1: run test data");
+			System.out.println("Press 2: input your own query (if your query is in the test data, we'll give you feedback as well)");
+			
+			int choiceOfMode = Integer.parseInt(in.readLine());
+			switch(choiceOfMode){
+				default:
+					System.out.println("Wrong choice of Mode! We'll choose test by default.");
+				case 1:
+					// TODO runTestData(query, search);
+					return;
+				case 2:
+					
+					break;
+			}
 			
 			// Let user enter query
 			System.out.println("Please enter your query:");
